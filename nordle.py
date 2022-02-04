@@ -1,19 +1,23 @@
 #!/usr/bin/python3
 
-WORD_LENGTH = 8
+# Author: Nicholas Corey
+# https://github.com/nicholascorey/nordle
+
+WORD_LENGTH = 5
 INCLUDE_PROPER_NOUNS = False
-TRIES = 8
+TRIES = 6
 
 import random
 
+print("Reading dictionary...\n")
 # read all words from dictionary
 f = open('american-english', 'r')
 words = []
 while True:
     w = f.readline()
-    if not w:
+    if not w or w.strip() == '':
         break
-    words.append(w[:-1])
+    words.append(w.strip())
 # remove words with punctuation
 words = [w for w in words if all(l.upper()>='A' and l.upper()<='Z' for l in w)]
 # optionally filter out all proper nouns
@@ -95,7 +99,7 @@ def printGuesses(target, guesses):
         out = '  '.join(out)
         print(out)
 
-def main():
+def playRound():
     print("Word length: {0}\nInclude proper nouns: {1}\nTries: {2}".format(WORD_LENGTH, "yes" if INCLUDE_PROPER_NOUNS else "no", TRIES))
     print("Choosing from {0} words...".format(str(len(words))))
 
@@ -114,4 +118,6 @@ def main():
     print('\nYOU LOST...  :-(\n')
     print("The correct word was \"{0}\"".format(target))
 
-main()
+while True:
+  playRound()
+  print('\n\n*** Next round! ***\n')
