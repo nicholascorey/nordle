@@ -11,23 +11,14 @@ import random
 
 print("Reading dictionary...\n")
 # read all words from dictionary
-f = open('american-english', 'r')
-words = []
-while True:
-    w = f.readline()
-    if not w or w.strip() == '':
-        break
-    words.append(w.strip())
-# remove words with punctuation
-words = [w for w in words if all(l.upper()>='A' and l.upper()<='Z' for l in w)]
+words = open('american-english', 'r').read().split('\n')
+# filter by word length
+words = [w for w in words if len(w)==WORD_LENGTH]
 # optionally filter out all proper nouns
 if not INCLUDE_PROPER_NOUNS:
-    words = [w.upper() for w in words if w[0].islower()]
-# filter by word length
-words = [w.upper() for w in words if len(w)==WORD_LENGTH]
-
-# initialize known letter list (the "keyboard" in Wordle)
-keyboard = dict([(chr(i+65), '?') for i in range(26)])
+    words = [w for w in words if w[0].islower()]
+# make all words uppercase
+words = [w.upper() for w in words]
 
 def makeGuess():
     while True:
@@ -67,7 +58,7 @@ def makeMatchPattern(target, guess):
             output.append(0)
     return output
 
-def updateKeyboard(target, guess):
+def updateKeyboard(keyboard, target, guess):
     # update letter status based on match pattern
     # (2:matched, 1:wrong location, ?:unknown, 0:wrong letter)
     matchPattern = makeMatchPattern(target, guess)
@@ -83,7 +74,7 @@ def updateKeyboard(target, guess):
                 kState = '0'
         keyboard[guess[i]] = kState
 
-def keyboardText():
+def keyboardText(keyboard):
     # create text to display the "keyboard"
     out = '(' + ''.join([k for k, s in keyboard.items() if s=='2']).upper() + ')   '
     out += '-' + ''.join([k for k, s in keyboard.items() if s=='1']).upper() + '-   '
@@ -103,15 +94,18 @@ def playRound():
     print("Word length: {0}\nInclude proper nouns: {1}\nTries: {2}".format(WORD_LENGTH, "yes" if INCLUDE_PROPER_NOUNS else "no", TRIES))
     print("Choosing from {0} words...".format(str(len(words))))
 
+    # initialize known letter list (the "keyboard" in Wordle)
+    keyboard = dict([(chr(i+65), '?') for i in range(26)])
+
     target = random.choice(words)
     guesses = []
     for i in range(TRIES):
         print('-'*40)
         guess = makeGuess()
-        updateKeyboard(target, guess)
+        updateKeyboard(keyboard, target, guess)
         guesses.append(guess)
         printGuesses(target, guesses)
-        print('\nLetter status (known location, known letter, unknown, elliminated):\n', keyboardText())
+        print('\nLetter status (known location, known letter, unknown, elliminated):\n', keyboardText(keyboard))
         if guesses[-1] == target:
             print('\nYOU WON!!!')
             return
